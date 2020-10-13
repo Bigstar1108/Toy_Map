@@ -1,10 +1,11 @@
 import React from 'react';
-import Map from './component/map';
+import SimpleMap from './component/map';
+import './App.css';
 
 function App() {
     return (
         <div className="App">
-            <Map />
+            <SimpleMap />
         </div>
     );
 }
