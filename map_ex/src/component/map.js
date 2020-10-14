@@ -1,5 +1,5 @@
-import React, { createRef } from 'react';
-import { Map, TileLayer } from 'react-leaflet';
+import React from 'react';
+import { Map, TileLayer, Marker, Polygon } from 'react-leaflet';
 
 function CSS() {
     return `
@@ -11,43 +11,87 @@ function CSS() {
 }
 
 class SimpleMap extends React.Component {
-    state = {
-        lat: 0,
-        lng: 0,
-        zoom: 13,
-    };
+    constructor(props) {
+        super(props);
+        this.state = {
+            center: {
+                lat: 0,
+                lng: 0,
+            },
+            markerData: [],
+            zoom: 13,
+            draggable: true,
+            zonePosition: [],
+        };
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.zoneIndex !== this.props.zoneIndex) {
+            this.setState({ markerData: [] });
+        }
+    }
 
     getCenterPosition() {
+        const { center } = this.state;
         navigator.geolocation.getCurrentPosition((position) => {
+            center.lat = position.coords.latitude;
+            center.lng = position.coords.longitude;
+
             this.setState({
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
+                center: center,
             });
+
+            this.props.setLoading();
         });
     }
 
-    mapRef = createRef();
+    addMarker = (event) => {
+        const { markerData } = this.state;
+        const coords = event.latlng;
+
+        console.log(coords);
+        this.setState({
+            markerData: [...markerData, coords],
+        });
+
+        this.updateZonePosition();
+    };
+
+    updateMarker = (event) => {
+        const latlng = event.target.getLatLng();
+        const markerIndex = event.target.options.marker_index;
+
+        this.setState((prevState) => {
+            const markerData = [...prevState.markerData];
+            markerData[markerIndex] = latlng;
+            return { markerData: markerData };
+        });
+
+        this.updateZonePosition();
+    };
+
+    updateZonePosition = () => {
+        const { markerData, zonePosition } = this.state;
+
+        zonePosition[this.props.zoneIndex] = markerData;
+
+        this.setState({
+            zonePosition: zonePosition,
+        });
+    };
 
     componentDidMount() {
         this.getCenterPosition();
     }
 
-    handleClick = () => {
-        console.log('Click');
-        const map = this.mapRef.current;
-        if (map != null) {
-            console.log(map.leafletElement.locate());
-            map.leafletElement.locate();
-        }
-    };
-
     render() {
-        const { lat, lng, zoom } = this.state;
-        const position = [lat, lng];
+        const { center, zoom, draggable, zonePosition } = this.state;
+        const position = [center.lat, center.lng];
+
         return (
             <>
                 <style>{CSS()}</style>
-                {lat === 0 || lng === 0 ? (
+                {center.lat === 0 || center.lng === 0 ? (
                     <>
                         <span>
                             지도를 로딩중입니다!
@@ -57,9 +101,19 @@ class SimpleMap extends React.Component {
                         <span>지도가 로딩이 안된다면 위치 허용을 확인해 주세요!</span>
                     </>
                 ) : (
-                    <Map center={position} zoom={zoom} onclick={this.handleClick} ref={this.mapRef}>
-                        <TileLayer attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors' url="http://{s}.tile.osm.org/{z}/{x}/{y}.png" />
-                    </Map>
+                    <>
+                        <Map center={position} zoom={zoom} onclick={this.props.zoneIndex === undefined ? null : this.addMarker}>
+                            <TileLayer attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors' url="http://{s}.tile.osm.org/{z}/{x}/{y}.png" />
+                            {zonePosition.map((el, index) => (
+                                <>
+                                    {el.map((el, index) => (
+                                        <Marker key={index} marker_index={index} position={el} draggable={draggable} ondragend={this.updateMarker} />
+                                    ))}
+                                    <Polygon positions={el} color={this.props.ZoneInfo[index].colorCode} fill={false} />
+                                </>
+                            ))}
+                        </Map>
+                    </>
                 )}
             </>
         );
