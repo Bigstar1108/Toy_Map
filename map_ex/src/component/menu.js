@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const Menu = ({ ZoneInfo, setZoneIndex, zoneIndex, loading }) => {
+const Menu = ({ ZoneInfo, setZoneIndex, zoneIndex, loading, markerDataLng }) => {
     const MenuItem = ({ list }) => {
         const [disableBtn, setDisableBtn] = useState(false);
 

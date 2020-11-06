@@ -20,7 +20,6 @@ class SimpleMap extends React.Component {
             },
             markerData: [],
             zoom: 13,
-            draggable: true,
             zonePosition: [],
         };
     }
@@ -49,7 +48,6 @@ class SimpleMap extends React.Component {
         const { markerData } = this.state;
         const coords = event.latlng;
 
-        console.log(coords);
         this.setState({
             markerData: [...markerData, coords],
         });
@@ -64,6 +62,7 @@ class SimpleMap extends React.Component {
         this.setState((prevState) => {
             const markerData = [...prevState.markerData];
             markerData[markerIndex] = latlng;
+
             return { markerData: markerData };
         });
 
@@ -85,7 +84,7 @@ class SimpleMap extends React.Component {
     }
 
     render() {
-        const { center, zoom, draggable, zonePosition } = this.state;
+        const { center, zoom, zonePosition } = this.state;
         const position = [center.lat, center.lng];
 
         return (
@@ -107,9 +106,9 @@ class SimpleMap extends React.Component {
                             {zonePosition.map((el, index) => (
                                 <>
                                     {el.map((el, index) => (
-                                        <Marker key={index} marker_index={index} position={el} draggable={draggable} ondragend={this.updateMarker} />
+                                        <Marker key={index} marker_index={index} position={el} draggable={this.props.zoneIndex === undefined ? false : true} ondragend={this.updateMarker} />
                                     ))}
-                                    <Polygon positions={el} color={this.props.ZoneInfo[index].colorCode} fill={false} />
+                                    <Polygon positions={el} color={this.props.ZoneInfo[index].colorCode} fill={false} ref={this.polygonRef} />
                                 </>
                             ))}
                         </Map>
