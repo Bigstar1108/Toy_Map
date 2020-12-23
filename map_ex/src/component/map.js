@@ -24,6 +24,28 @@ class SimpleMap extends React.Component {
         };
     }
 
+    isCoordInsidePolygon(polyPoints, point) {
+        var x = point.lat;
+        var y = point.lng;
+
+        var inside = false;
+
+        for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
+            var xi = polyPoints[i].lat,
+                yi = polyPoints[i].lng;
+            var xj = polyPoints[j].lat,
+                yj = polyPoints[j].lng;
+
+            var intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+
+            if (intersect) {
+                inside = !inside;
+            }
+        }
+
+        return inside;
+    }
+
     componentDidUpdate(prevProps, prevState) {
         if (prevProps.zoneIndex !== this.props.zoneIndex) {
             this.setState({ markerData: [] });
@@ -33,6 +55,8 @@ class SimpleMap extends React.Component {
     getCenterPosition() {
         const { center } = this.state;
         navigator.geolocation.getCurrentPosition((position) => {
+            // console.log(position.coords);
+
             center.lat = position.coords.latitude;
             center.lng = position.coords.longitude;
 
@@ -45,14 +69,28 @@ class SimpleMap extends React.Component {
     }
 
     addMarker = (event) => {
-        const { markerData } = this.state;
+        const { markerData, zonePosition } = this.state;
         const coords = event.latlng;
+        const { zoneIndex } = this.props;
 
-        this.setState({
-            markerData: [...markerData, coords],
-        });
+        if (zoneIndex === 0) {
+            this.setState({
+                markerData: [...markerData, coords],
+            });
 
-        this.updateZonePosition();
+            this.updateZonePosition();
+        } else {
+            if (this.isCoordInsidePolygon(zonePosition[zoneIndex - 1], coords)) {
+                this.setState({
+                    markerData: [...markerData, coords],
+                });
+
+                this.updateZonePosition();
+            } else {
+                alert(`Error: Zone${zoneIndex} 영역 안에 좌표가 있어야 합니다.`);
+                return null;
+            }
+        }
     };
 
     updateMarker = (event) => {
@@ -108,7 +146,7 @@ class SimpleMap extends React.Component {
                                     {el.map((el, index) => (
                                         <Marker key={index} marker_index={index} position={el} draggable={this.props.zoneIndex === undefined ? false : true} ondragend={this.updateMarker} />
                                     ))}
-                                    <Polygon positions={el} color={this.props.ZoneInfo[index].colorCode} fill={false} ref={this.polygonRef} />
+                                    <Polygon onclick={() => console.log(this.polygonRef)} positions={el} color={this.props.ZoneInfo[index].colorCode} fill={false} ref={this.polygonRef} />
                                 </>
                             ))}
                         </Map>
