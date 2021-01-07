@@ -1,11 +1,17 @@
 import React from 'react';
-import { Map, TileLayer, Marker, Polygon } from 'react-leaflet';
+import { Map, TileLayer, Marker, Polygon, Polyline } from 'react-leaflet';
+// import { shipIcon } from './sheepIcon';
+import { icon, divIcon } from 'leaflet';
 
 function CSS() {
     return `
     .leaflet-container {
         height: 100%;
         width: 100%;
+    }
+    .leaflet-marker-icon{
+        background: none;
+        border: 0px;
     }
     `;
 }
@@ -21,7 +27,24 @@ class SimpleMap extends React.Component {
             markerData: [],
             zoom: 13,
             zonePosition: [],
+            lineCoordsState: [
+                [45.51, -122.68],
+                [37.77, -122.43],
+                [34.04, -118.2],
+                [32.08, -102.7],
+            ],
         };
+    }
+
+    componentDidUpdate(prevProps) {
+        const { lineCoords } = this.props;
+        if (prevProps.lineCoords.length !== lineCoords.length) {
+            this.setState({
+                lineCoordsState: lineCoords,
+            });
+        } else {
+            return null;
+        }
     }
 
     isCoordInsidePolygon(polyPoints, point) {
@@ -55,7 +78,7 @@ class SimpleMap extends React.Component {
     getCenterPosition() {
         const { center } = this.state;
         navigator.geolocation.getCurrentPosition((position) => {
-            // console.log(position.coords);
+            console.log(position.coords);
 
             center.lat = position.coords.latitude;
             center.lng = position.coords.longitude;
@@ -121,6 +144,31 @@ class SimpleMap extends React.Component {
         this.getCenterPosition();
     }
 
+    drawLine() {
+        const { lineCoordsState } = this.state;
+        const index = lineCoordsState.length - 1;
+        const rotateValue = 90;
+
+        const shipIcon = divIcon({
+            iconSize: [50, 50],
+            iconAnchor: [50, 50],
+            html: `
+            <img
+                style="transform: rotate(${rotateValue}deg);"
+                height="100px"
+                width="100px"
+                src='/img/map/shipicon1.svg'>
+            `,
+        });
+
+        return (
+            <>
+                <Polyline positions={lineCoordsState} />
+                <Marker marker_index={20} position={lineCoordsState[index]} icon={shipIcon} />
+            </>
+        );
+    }
+
     render() {
         const { center, zoom, zonePosition } = this.state;
         const position = [center.lat, center.lng];
@@ -149,6 +197,7 @@ class SimpleMap extends React.Component {
                                     <Polygon onclick={() => console.log(this.polygonRef)} positions={el} color={this.props.ZoneInfo[index].colorCode} fill={false} ref={this.polygonRef} />
                                 </>
                             ))}
+                            {this.drawLine()}
                         </Map>
                     </>
                 )}
