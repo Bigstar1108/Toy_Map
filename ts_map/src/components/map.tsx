@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import {useDispatch} from 'react-redux';
+import {RootStateOrAny, useDispatch, useSelector} from 'react-redux';
 import styled from 'styled-components';
 import {MapContainer, TileLayer} from 'react-leaflet';
-import {LatLngExpression} from 'leaflet';
-import { getCenter } from '../modules/position/getCenter';
+import { getCenterPosition } from '../modules/position/getCenter';
+import Loading from './loading';
 
 const CSS = () => {
   return `
@@ -18,6 +18,7 @@ const SimpleMapContainer = styled.div`
   width: 100%;
   height: 90%;
   display: flex;
+  background-color: #292929;
   justify-content: center;
   align-items: center;
   flex-direction: column;
@@ -25,24 +26,27 @@ const SimpleMapContainer = styled.div`
 
 const SimpleMap = () => {
     const dispatch = useDispatch();
+    const {position, isLoading} = useSelector((state: RootStateOrAny) => state.getCenter);
 
-    const position: LatLngExpression = [51.505, -0.09];
-    const zoom:number = 13;
+    const [zoom, setZoom] = useState(13);
 
     useEffect(() => {
-      dispatch(getCenter(''));
-    });
+      dispatch(getCenterPosition());
+    }, [dispatch]);
 
     return(
       <>
       <style>{CSS()}</style>
       <SimpleMapContainer>
-        <MapContainer center={position} zoom={zoom} scrollWheelZoom={false}>
-          <TileLayer
-            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-            url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
-          />
-        </MapContainer>
+        {
+          isLoading ? <Loading /> : 
+          <MapContainer center={position} zoom={zoom} scrollWheelZoom={false}>
+            <TileLayer
+              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+              url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+            />
+          </MapContainer>
+        }
       </SimpleMapContainer>
       </>
     )
