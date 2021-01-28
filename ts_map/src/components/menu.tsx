@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import {RootStateOrAny, useDispatch, useSelector} from 'react-redux';
+import {addZoneMenu, removeZoneMenu} from '../modules/zone/zoneMenu';
 
 const MenuContainer = styled.div`
     width: 100%;
     height: 10%;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    flex-direction: row;
     background-color: #c9d8e6;
 `;
 
@@ -19,6 +22,13 @@ const MenuItem = styled.div`
 `;
 
 const Menu = () => {
+    const dispatch = useDispatch();
+    const {zoneMenu} = useSelector((state: RootStateOrAny) => state.zoneMenu);
+
+    // useEffect(() => {
+    //     console.log(zoneMenu);
+    // }, [dispatch]);
+
     return(
         <MenuContainer>
             <MenuItem>
