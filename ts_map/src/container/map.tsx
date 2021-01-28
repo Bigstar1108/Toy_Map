@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {RootStateOrAny, useDispatch, useSelector} from 'react-redux';
 import styled from 'styled-components';
-import {MapContainer, TileLayer, useMapEvents, Marker, Polygon} from 'react-leaflet';
+import {MapContainer, TileLayer} from 'react-leaflet';
 import { getCenterPosition } from '../modules/position/getCenter_action';
-import {addMarkerData} from '../modules/zone/markerData';
 import Loading from '../components/loading';
+import Markers from '../components/marker';
+import ZonePositionDraw from '../components/zonePosition';
 
 const CSS = () => {
   return `
@@ -28,33 +29,15 @@ const SimpleMapContainer = styled.div`
 const SimpleMap = () => {
     const dispatch = useDispatch();
     const {position, isLoading} = useSelector((state: RootStateOrAny) => state.getCenter);
-    const {zoneMenu, setIndex} = useSelector((state: RootStateOrAny) => state.zoneMenu);
-    const {markerData} = useSelector((state:RootStateOrAny) => state.markerData);
+    const {setIndex} = useSelector((state: RootStateOrAny) => state.zoneMenu);
+    const {zonePosition} = useSelector((state:RootStateOrAny) => state.zonePosition);
 
-    const [zoom, setZoom] = useState(13);
-    const [minZoom, setMinZoom] = useState(3);
+    const zoom = 13;
+    const minZoom = 3;
     
     useEffect(() => {
       dispatch(getCenterPosition());
     }, [dispatch]);
-
-    const Markers = () => {
-      const map = useMapEvents({
-        click(e){
-          const coords = e.latlng;
-          dispatch(addMarkerData({lat: coords.lat, lng: coords.lng}));
-        }
-      })
-
-      const index = zoneMenu.findIndex((item:any) => item.id === setIndex);
-
-      return <>
-      {markerData.map((item:any, index:number) => (
-        <Marker key = {index} position = {item} />
-      ))}
-      <Polygon fill = {false} positions = {markerData} color = {`#${zoneMenu[index].colorCode}`} />
-      </>;
-    }
 
     return(
       <>
@@ -70,6 +53,9 @@ const SimpleMap = () => {
               attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
               url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
             />
+            {
+              zonePosition.length === 0 ? '' : <ZonePositionDraw />
+            }
           </MapContainer>
         }
       </SimpleMapContainer>

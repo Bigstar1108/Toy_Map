@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import {RootStateOrAny, useDispatch, useSelector} from 'react-redux';
 import {addZoneMenu} from '../modules/zone/zoneMenu';
@@ -33,10 +33,6 @@ const Menu = () => {
     const dispatch = useDispatch();
     const {zoneMenu} = useSelector((state: RootStateOrAny) => state.zoneMenu);
     const {isLoading} = useSelector((state:RootStateOrAny) => state.getCenter);
-    
-    // useEffect(() => {
-    //     console.log(zoneMenu);
-    // }, [dispatch]);
 
     return(
         <MenuContainer>

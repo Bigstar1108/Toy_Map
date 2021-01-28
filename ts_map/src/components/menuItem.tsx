@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import {useDispatch, RootStateOrAny, useSelector} from 'react-redux';
 import {removeZoneMenu, setZoneIndex} from '../modules/zone/zoneMenu';
 import {clearMarkerData} from '../modules/zone/markerData';
-import {addZonePosition} from '../modules/zone/zonePosition';
+import {addZonePosition, removeZonePosition, clearZonePositionByIndex} from '../modules/zone/zonePosition';
 
 const MenuItemDiv = styled.div`
     display: flex;
@@ -16,22 +16,32 @@ const MenuItemDiv = styled.div`
     font-weight: bold;
 `;
 
-const MenuItem = (list: any) => {
+interface MenuItemType{
+    list: any;
+    index: number;
+}
+
+const MenuItem:React.FC<MenuItemType> = ({list, index}) => {
     const dispatch = useDispatch();
     const {setIndex} = useSelector((state: RootStateOrAny) => state.zoneMenu);
     const {markerData} = useSelector((state:RootStateOrAny) => state.markerData);
 
-    const {id, colorCode} = list.list;
-    const {index} = list;
+    const {id, colorCode} = list;
 
     const onClickMenuBtn = () => {
         if(setIndex === id){
+            dispatch(addZonePosition({index: index, position: markerData}));
             dispatch(clearMarkerData());
             dispatch(setZoneIndex(id));
         }else{
-            console.log("false");
+            dispatch(clearZonePositionByIndex(index));
             dispatch(setZoneIndex(id));
         }
+    }
+
+    const onClickRemove = () => {
+        dispatch(removeZoneMenu(id));
+        dispatch(removeZonePosition(index));
     }
 
     return(
@@ -41,7 +51,7 @@ const MenuItem = (list: any) => {
             <button disabled = {!(setIndex === undefined) && !(setIndex === id)} onClick = {onClickMenuBtn}>
                 {setIndex === id ? '설정 완료' : '설정 하기'}
             </button>
-            <button onClick = {() => dispatch(removeZoneMenu(id))}>삭제</button>
+            <button onClick = {onClickRemove}>삭제</button>
             </>
         </MenuItemDiv>
     )
