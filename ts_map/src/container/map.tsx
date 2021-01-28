@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {RootStateOrAny, useDispatch, useSelector} from 'react-redux';
 import styled from 'styled-components';
-import {MapContainer, TileLayer, useMapEvents, Marker} from 'react-leaflet';
+import {MapContainer, TileLayer, useMapEvents, Marker, Polygon} from 'react-leaflet';
 import { getCenterPosition } from '../modules/position/getCenter_action';
 import {addMarkerData} from '../modules/zone/markerData';
 import Loading from '../components/loading';
@@ -28,6 +28,7 @@ const SimpleMapContainer = styled.div`
 const SimpleMap = () => {
     const dispatch = useDispatch();
     const {position, isLoading} = useSelector((state: RootStateOrAny) => state.getCenter);
+    const {zoneMenu, setIndex} = useSelector((state: RootStateOrAny) => state.zoneMenu);
     const {markerData} = useSelector((state:RootStateOrAny) => state.markerData);
 
     const [zoom, setZoom] = useState(13);
@@ -45,9 +46,14 @@ const SimpleMap = () => {
         }
       })
 
-      return (markerData.map((item:any, index:number) => (
+      const index = zoneMenu.findIndex((item:any) => item.id === setIndex);
+
+      return <>
+      {markerData.map((item:any, index:number) => (
         <Marker key = {index} position = {item} />
-      )));
+      ))}
+      <Polygon fill = {false} positions = {markerData} color = {`#${zoneMenu[index].colorCode}`} />
+      </>;
     }
 
     return(
@@ -57,7 +63,9 @@ const SimpleMap = () => {
         {
           isLoading ? <Loading /> : 
           <MapContainer center={position} zoom={zoom} scrollWheelZoom={true} minZoom = {minZoom} >
-            <Markers />
+            {
+              setIndex === undefined ? '' : <Markers />
+            }
             <TileLayer
               attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
               url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
