@@ -21,16 +21,4 @@ const Center = createSlice({
 
 export default Center.reducer;
 
-const {startGetCenter, hasError, getCenterSuccess} = Center.actions;
-
-export const getCenterPosition = () => async (dispatch: any) => {
-    dispatch(startGetCenter());
-    try{
-        navigator.geolocation.getCurrentPosition((position) => {
-            const center = {lat: position.coords.latitude, lng: position.coords.longitude};
-            dispatch(getCenterSuccess(center));
-        })
-    }catch(e){
-        dispatch(hasError(e));
-    }
-}
+export const {startGetCenter, hasError, getCenterSuccess} = Center.actions;
