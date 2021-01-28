@@ -34,9 +34,9 @@ const Menu = () => {
     const {zoneMenu} = useSelector((state: RootStateOrAny) => state.zoneMenu);
     const {isLoading} = useSelector((state:RootStateOrAny) => state.getCenter);
     
-    useEffect(() => {
-        console.log(zoneMenu);
-    }, [dispatch]);
+    // useEffect(() => {
+    //     console.log(zoneMenu);
+    // }, [dispatch]);
 
     return(
         <MenuContainer>
@@ -46,6 +46,7 @@ const Menu = () => {
                 <span>ZONE을 추가해주세요!</span>
                 :zoneMenu.map((list:any, index:number) => (
                     <MenuItem
+                        key = {index}
                         list = {list}
                         index = {index}
                     />
