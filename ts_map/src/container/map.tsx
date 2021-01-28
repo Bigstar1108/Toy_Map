@@ -3,7 +3,7 @@ import {RootStateOrAny, useDispatch, useSelector} from 'react-redux';
 import styled from 'styled-components';
 import {MapContainer, TileLayer} from 'react-leaflet';
 import { getCenterPosition } from '../modules/position/getCenter_action';
-import Loading from './loading';
+import Loading from '../components/loading';
 
 const CSS = () => {
   return `
