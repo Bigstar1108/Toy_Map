@@ -51,7 +51,7 @@ const MenuItem:React.FC<MenuItemType> = ({list, index}) => {
             <button disabled = {!(setIndex === undefined) && !(setIndex === id)} onClick = {onClickMenuBtn}>
                 {setIndex === id ? '설정 완료' : '설정 하기'}
             </button>
-            <button onClick = {onClickRemove}>삭제</button>
+            <button disabled = {setIndex === id} onClick = {onClickRemove}>삭제</button>
             </>
         </MenuItemDiv>
     )
